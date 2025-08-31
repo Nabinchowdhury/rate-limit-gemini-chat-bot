@@ -2,10 +2,10 @@ import express from 'express'
 import dotenv from "dotenv";
 // import { GoogleGenAI } from "@google/genai";
 
-import { google } from "@ai-sdk/google";
-import { generateText } from "ai";
-// import { streamText } from "ai";
-// import { createGoogleGenerativeAI } from "@ai-sdk/google";
+// import { google } from "@ai-sdk/google";
+// import { generateText } from "ai";
+import { streamText } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { checkRateLimit , getUserLimit, userLimits} from './redis.js';
 import { authMiddleware, generateToken } from './auth.js';
 // import serverless from "serverless-http";  install if want to use AWS lambda
@@ -26,7 +26,7 @@ app.use(authMiddleware);
 // const ai = google({ apiKey: process.env.GEMINI_API_KEY });
 // const model  = google("gemini-2.5-flash", { apiKey: process.env.GEMINI_API_KEY });
 
-const model = google("gemini-2.5-flash");  //env variable name must be GOOGLE_GENERATIVE_AI_API_KEY
+const model = createGoogleGenerativeAI("gemini-2.5-flash");  //env variable name must be GOOGLE_GENERATIVE_AI_API_KEY
 
 app.post("/api/login", (req, res) => {
   const { id, role } = req.body;
@@ -47,17 +47,17 @@ app.post("/api/chat", async (req, res) => {
       //   model: "gemini-2.5-flash",
       //   contents: prompt,
       // });
-      const response = await generateText({
+      const response = await streamText({
         model,
         prompt,
       });
       // res.json(response.text);
-       res.json({
-      success: true,
-      reply: response.text,
-      remaining_requests: result.remainingCount,
-    });
-      // response.pipe(res);
+    //    res.json({
+    //   success: true,
+    //   reply: response.text,
+    //   remaining_requests: result.remainingCount,
+    // });
+      response.pipe(res);
     } else {
       res.status(429).send({
         "success": false,
