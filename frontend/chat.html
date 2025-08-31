@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot</title>
+</head>
+<body>
+  <h1>Chatbot</h1>
+  <div id="user-info"></div>
+  <div id="chat"></div>
+
+  <input id="input" placeholder="Type a message..." />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    // Load user info from localStorage
+    const username = localStorage.getItem("username");
+    const role = localStorage.getItem("role");
+
+    if (!username || !role) {
+      // If no user info, redirect back to sign in
+      window.location.href = "/";
+    } else {
+      document.getElementById("user-info").innerHTML =
+        `<p><b>Signed in as:</b> ${username} (${role})</p>`;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("input");
+      const message = input.value;
+      input.value = "";
+
+      document.getElementById("chat").innerHTML += `<p><b>${username}:</b> ${message}</p>`;
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [{ role: "user", content: message }] })
+      });
+      const data = await res.json();
+
+      document.getElementById("chat").innerHTML += `<p><b>AI:</b> ${data.reply}</p>`;
+    }
+  </script>
+</body>
+</html>
