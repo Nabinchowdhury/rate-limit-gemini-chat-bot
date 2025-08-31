@@ -1,9 +1,10 @@
 import { createClient } from 'redis';
 
-const redisClient  = createClient()
+const redisClient = createClient();
+
 redisClient .on("error", (err) => console.log("Redis Client Error", err))
   .connect();
-console.log('here')
+
 await redisClient .set("key", "value");
 const value = await redisClient.get("key");
 // await client.disconnect();
@@ -14,13 +15,12 @@ const userLimits = {
   premium: 50,
 };
 
-export async function checkRateLimit(user) {
-  const windowMs = 10000; // 1 second window
-  console.log(user.role)
+async function checkRateLimit(user) {
+  // const windowMs = 60 * 60 * 1000; // 60 min window
+  const windowMs = 10000; // 10 second window
   const maxRequests = userLimits[user.role]; // Maximum requests per window
   
   let userSession = await redisClient.hGetAll(`user-session:123${user.id}`);
-  console.log(userSession, "having this");
   
   if (Object.keys(userSession).length == 0) {
     // If not, initialize the count
@@ -31,7 +31,6 @@ export async function checkRateLimit(user) {
     return {remainingCount: maxRequests - 1}; // Allow the first request
   } else {
     const { count, timestamp } = userSession;
-    console.log(count, "count");
     // Check if the window has elapsed, reset the count
     if (Date.now() - timestamp > windowMs) {
       console.log(timestamp);
@@ -55,4 +54,23 @@ export async function checkRateLimit(user) {
 }
 
 
-export {redisClient};
+async function getUserLimit(user) {
+  const windowMs = 10000;
+  const maxRequests = userLimits[user.role]; 
+  
+  let userSession = await redisClient.hGetAll(`user-session:123${user.id}`);
+  const { count, timestamp } = userSession;
+
+  if (Object.keys(userSession).length == 0) {
+    const maxRequests = userLimits[user.role];
+    return {remainingCount: maxRequests};
+  } else {
+    if(Date.now() - timestamp > windowMs){
+      return {remainingCount: maxRequests}
+    }
+    return {remainingCount: maxRequests - count}
+  }
+}
+
+
+export {redisClient, userLimits, checkRateLimit, getUserLimit};

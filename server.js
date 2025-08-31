@@ -1,7 +1,7 @@
 import express from 'express'
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
-import { checkRateLimit } from './redis.js';
+import { checkRateLimit , getUserLimit, userLimits} from './redis.js';
 import { authMiddleware, generateToken } from './auth.js';
 // import serverless from "serverless-http";  install if want to use AWS lambda
 
@@ -29,25 +29,22 @@ app.post("/api/login", (req, res) => {
   res.json({ token });
 });
 
-app.post("/geminiAi-integration/api/chat", async (req, res) => {
+app.post("/api/chat", async (req, res) => {
 
   let result = await checkRateLimit(req.user);
+  console.log(result);
   try {
     if (result.remainingCount >= 0) {
-      // req.rateLimitResult = result;
       const { prompt } = req.body;
-      console.log('req.body', req.body)
-      console.log('prompt', prompt)
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
       });
-      console.log("response", response.text);
       res.json(response.text);
     } else {
       res.status(429).send({
         "success": false,
-        "error": "Too many requests. Free users can make 10 requests per hour.",
+        "error": `Too many requests. ${req.user.role} users can make ${userLimits[req.user.role]} requests per hour.`,
         "remaining_requests": 0
       });
     }
@@ -56,6 +53,28 @@ app.post("/geminiAi-integration/api/chat", async (req, res) => {
   }
 });
 
+app.get("/api/status", async (req, res) => {
+  let result = await getUserLimit(req.user);
+  try {
+    if (result.remainingCount >= 0) {
+      res.send({
+       "success": true,
+       "message": "Your limit status",
+       "remaining_requests": result.remainingCount
+        }
+      );
+    } else {
+      res.status(429).send({
+        "success": false,
+        "error": `Too many requests. ${req.user.role} users can make ${userLimits[req.user.role]} requests per hour.`,
+        "remaining_requests": 0
+      });
+    }
+  } catch (error) {
+    res.status(500).send("Internal Server Error");
+  }
+  
+});
 app.get("/geminiAi-integration", async (req, res) => {
   let result = await checkRateLimit(req.user);
   try {
@@ -69,7 +88,7 @@ app.get("/geminiAi-integration", async (req, res) => {
     } else {
       res.status(429).send({
         "success": false,
-        "error": "Too many requests. Free users can make 10 requests per hour.",
+        "error": `Too many requests. ${req.user.role} users can make ${userLimits[req.user.role]} requests per hour.`,
         "remaining_requests": 0
       });
     }

@@ -1,6 +1,7 @@
 // auth.js
 // const jwt = require("jsonwebtoken");
 import jwt from "jsonwebtoken"
+import { userLimits } from "./redis.js";
 const SECRET = "supersecret";
 
 function generateToken(user) {
@@ -19,7 +20,12 @@ function authMiddleware(req, res, next) {
   }
   try {
     const token = authHeader.split(" ")[1];
-    req.user = jwt.verify(token, SECRET);
+    const user = jwt.verify(token, SECRET);
+    if(!userLimits[user.role]){
+      req.user = null;
+      return res.status(404).send("User not found");
+    }
+    req.user = user;
   } catch {
     req.user = null;
   }
