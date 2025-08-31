@@ -2,6 +2,7 @@ import express from 'express'
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import { checkRateLimit } from './redis.js';
+import { authMiddleware, generateToken } from './auth.js';
 // import serverless from "serverless-http";  install if want to use AWS lambda
 
 dotenv.config();
@@ -16,7 +17,7 @@ app.use(express.json());
 dotenv.config();
 
 
-// app.use();
+app.use(authMiddleware);
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -30,9 +31,9 @@ app.post("/api/login", (req, res) => {
 
 app.post("/geminiAi-integration/api/chat", async (req, res) => {
 
-  let result = await checkRateLimit(userID, role);
+  let result = await checkRateLimit(req.user);
   try {
-    if (result) {
+    if (result.remainingCount >= 0) {
       // req.rateLimitResult = result;
       const { prompt } = req.body;
       console.log('req.body', req.body)
@@ -56,10 +57,7 @@ app.post("/geminiAi-integration/api/chat", async (req, res) => {
 });
 
 app.get("/geminiAi-integration", async (req, res) => {
-  console.log('pass', req.rateLimitResult)
-  const userID = req.body?.id || req.ip;
-  const role = req.body?.id ? req.body?.role? req.body?.role : 'free' : 'guest';
-  let result = await checkRateLimit(userID, role);
+  let result = await checkRateLimit(req.user);
   try {
     if (result.remainingCount >= 0) {
       res.send({
@@ -84,13 +82,3 @@ app.get("/geminiAi-integration", async (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on http://localhost:${port}`)
 })
-
-// async function main() {
-//   const response = await ai.models.generateContent({
-//     model: "gemini-2.5-flash",
-//     contents: "Explain how AI works in a few words",
-//   });
-//   console.log("response", response.text);
-// }
-
-// main();

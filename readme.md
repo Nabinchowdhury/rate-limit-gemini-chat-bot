@@ -1,4 +1,15 @@
+## for redis
 docker run -p 6379:6379 -it redis/redis-stack-server:latest
 
 
-to test redis type :  node testredis.js
+### RUN server
+    nodemon server.js
+
+### login api
+    endpoint: http://localhost:3000/api/login
+    body: {"id": 333, "role": "premium"}
+
+### get api
+    endpoint: http://localhost:3000/geminiAi-integration/
+    headers : 
+            authorization : `Bearer ${JWT}` || null

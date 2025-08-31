@@ -1,5 +1,6 @@
 // auth.js
-const jwt = require("jsonwebtoken");
+// const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken"
 const SECRET = "supersecret";
 
 function generateToken(user) {
@@ -7,9 +8,13 @@ function generateToken(user) {
 }
 
 function authMiddleware(req, res, next) {
+//   console.log(req.headers, 'req.headers')
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    req.user = null; // Guest
+    req.user = {
+        id : req.ip,
+        role: "guest"
+    };
     return next();
   }
   try {
