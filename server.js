@@ -1,5 +1,4 @@
 import { GoogleGenAI } from "@google/genai";
-import { LanguageServiceClient } from '@google-cloud/language';
 import dotenv from "dotenv";
 // import serverless from "serverless-http";  install if want to use AWS lambda
 
