@@ -34,7 +34,7 @@ app.post("/geminiAi-integration/api/chat", async (req, res) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-goog-api-key": `${process.env.x_goog_api_key}`,
+      "x-goog-api-key": `${process.env.GEMINI_API_KEY}`,
     },
     body: JSON.stringify({ "contents": [ { "parts": [ { "text": `${prompt}` } ] } ] }),
   });
