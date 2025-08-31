@@ -3,7 +3,7 @@ docker run -p 6379:6379 -it redis/redis-stack-server:latest
 
 
 create a .env file
- add `GOOGLE_GENERATIVE_AI_API_KEY=AIzaSyD5YyEPcZmpEupjNWPmTCO0msENbyOQir0`
+ add `GOOGLE_GENERATIVE_AI_API_KEY={gemini-api-key}`
 
 ### RUN server
     nodemon server.js
