@@ -1,4 +1,4 @@
-import redisClient from "./redisc.js";
+import redisClient from "./redis.js";
 
 async function testRedis() {
   await redisClient.set("my-key", "Hello Redis!");
