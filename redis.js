@@ -16,8 +16,8 @@ const userLimits = {
 };
 
 async function checkRateLimit(user) {
-  // const windowMs = 60 * 60 * 1000; // 60 min window
-  const windowMs = 10000; // 10 second window
+  const windowMs = 60 * 60 * 1000; // 60 min window
+  // const windowMs = 10000; // 10 second window
   const maxRequests = userLimits[user.role]; // Maximum requests per window
   
   let userSession = await redisClient.hGetAll(`user-session:123${user.id}`);
@@ -55,7 +55,7 @@ async function checkRateLimit(user) {
 
 
 async function getUserLimit(user) {
-  const windowMs = 10000;
+  const windowMs = 60 * 60 * 1000; // 60 min window
   const maxRequests = userLimits[user.role]; 
   
   let userSession = await redisClient.hGetAll(`user-session:123${user.id}`);
