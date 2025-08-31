@@ -1,5 +1,4 @@
-// auth.js
-// const jwt = require("jsonwebtoken");
+
 import jwt from "jsonwebtoken"
 import { userLimits } from "./redis.js";
 const SECRET = "supersecret";
@@ -9,7 +8,6 @@ function generateToken(user) {
 }
 
 function authMiddleware(req, res, next) {
-//   console.log(req.headers, 'req.headers')
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     req.user = {
