@@ -11,19 +11,24 @@ create a .env file
 ### login api
     endpoint: http://localhost:3000/api/login
     body: {"id": 333, "role": "premium"}
+    output: ![alt text](image-1.png)
 
 ### get status api
     endpoint: http://localhost:3000/api/status
     headers : 
             authorization : `Bearer ${JWT}` || null
+    output: ![alt text](image-2.png)
 
 ### basic get api
     endpoint: http://localhost:3000/geminiAi-integration/
     headers : 
             authorization : `Bearer ${JWT}` || null
+    output: ![alt text](image-3.png)
 
 ### chat api    
     endpoint: http://localhost:3000/api/chat
     headers : 
             authorization : `Bearer ${JWT}` || null
     body: { "prompt": "Explain how AI works in a few words"}
+
+    output : ![alt text](image.png)
